@@ -54,6 +54,16 @@ static void check_base(void)
 		report_prefix_pop();
 	}
 
+	if (env_is_defined("SBI_IMPLID")) {
+		report_prefix_push("sbi_impl_id");
+		ret = sbi_ecall(SBI_EXT_BASE, SBI_EXT_BASE_GET_IMP_ID,
+				SBI_EXT_BASE, 0, 0, 0, 0, 0);
+		expected = strtol(getenv("SBI_IMPLID"), NULL, 0);
+
+		gen_report(&ret, expected);
+		report_prefix_pop();
+	}
+
 	if (env_is_defined("PROBE_EXT")) {
 		report_prefix_push("probe_ext");
 		expected = strtol(getenv("PROBE_EXT"), NULL, 0);
