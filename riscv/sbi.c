@@ -14,6 +14,23 @@ static void help(void)
 	puts("An environ must be provided where expected values are given.\n");
 }
 
+static int env_is_defined(const char *env)
+{
+
+	if (!getenv(env)) {
+		report_skip("mvendorid: missing MVENDORID environment variable");
+		return 0;
+	}
+
+	return 1;
+}
+
+static void gen_report(struct sbiret *ret, long expected)
+{
+	report(!ret->error, "no sbi.error");
+	report(ret->value == expected, "expected sbi.value");
+}
+
 static void check_base(void)
 {
 	struct sbiret ret;
@@ -21,35 +38,27 @@ static void check_base(void)
 
 	report_prefix_push("base");
 
-	if (!getenv("MVENDORID")) {
-		report_skip("mvendorid: missing MVENDORID environment variable");
-		return;
+	if (env_is_defined("MVENDORID")) {
+		report_prefix_push("mvendorid");
+		expected = strtol(getenv("MVENDORID"), NULL, 0);
+
+		ret = sbi_ecall(SBI_EXT_BASE, SBI_EXT_BASE_GET_MVENDORID,
+				0, 0, 0, 0, 0, 0);
+
+		gen_report(&ret, expected);
+		report_prefix_pop();
 	}
 
-	report_prefix_push("mvendorid");
-	expected = strtol(getenv("MVENDORID"), NULL, 0);
+	if (env_is_defined("PROBE_EXT")) {
+		report_prefix_push("probe_ext");
+		expected = strtol(getenv("PROBE_EXT"), NULL, 0);
 
-	ret = sbi_ecall(SBI_EXT_BASE, SBI_EXT_BASE_GET_MVENDORID,
-			0, 0, 0, 0, 0, 0);
+		ret = sbi_ecall(SBI_EXT_BASE, SBI_EXT_BASE_PROBE_EXT,
+				SBI_EXT_BASE, 0, 0, 0, 0, 0);
 
-	report(!ret.error, "no sbi.error");
-	report(ret.value == expected, "expected sbi.value");
-	report_prefix_pop();
-
-	if (!getenv("PROBE_EXT")) {
-		report_skip("probe_ext: missing PROBE_EXT environment variable");
-		return;
+		gen_report(&ret, expected);
+		report_prefix_pop();
 	}
-
-	report_prefix_push("probe_ext");
-	expected = strtol(getenv("PROBE_EXT"), NULL, 0);
-
-	ret = sbi_ecall(SBI_EXT_BASE, SBI_EXT_BASE_PROBE_EXT,
-			SBI_EXT_BASE, 0, 0, 0, 0, 0);
-
-	report(!ret.error, "no sbi.error");
-	report(ret.value == expected, "expected sbi.value");
-	report_prefix_pop();
 
 	report_prefix_pop();
 }
