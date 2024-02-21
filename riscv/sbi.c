@@ -64,6 +64,14 @@ static void check_base(void)
 		report_prefix_pop();
 	}
 
+	if (env_is_defined("SBI_IMPLID_MAX")) {
+		report_prefix_push("sbi_impl_id_max");
+		expected = strtol(getenv("SBI_IMPLID_MAX"), NULL, 0);
+
+		gen_report(&ret, (ret.value <= expected));
+		report_prefix_pop();
+	}
+
 	if (env_is_defined("PROBE_EXT")) {
 		report_prefix_push("probe_ext");
 		expected = strtol(getenv("PROBE_EXT"), NULL, 0);
