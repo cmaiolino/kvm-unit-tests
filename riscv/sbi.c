@@ -28,7 +28,12 @@ static int env_is_defined(const char *env)
 static void gen_report(struct sbiret *ret, long expected)
 {
 	report(!ret->error, "no sbi.error");
-	report(ret->value == expected, "expected sbi.value");
+
+	if (ret->value == expected)
+		report(true, "expected sbi.value");
+	else
+		report(false, "expected sbi.value: %ld - Got: %ld",
+		       expected, ret->value);
 }
 
 static void check_base(void)
