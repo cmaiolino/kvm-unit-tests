@@ -60,6 +60,17 @@ static void check_base(void)
 		report_prefix_pop();
 	}
 
+	if (env_is_defined("MARCHID")) {
+		report_prefix_push("marchid");
+		expected = strtol(getenv("MARCHID"), NULL, 0);
+
+		ret = sbi_ecall(SBI_EXT_BASE, SBI_EXT_BASE_PROBE_EXT,
+				SBI_EXT_BASE_GET_MARCHID, 0, 0, 0, 0, 0);
+
+		gen_report(&ret, expected);
+		report_prefix_pop();
+	}
+
 	report_prefix_pop();
 }
 
